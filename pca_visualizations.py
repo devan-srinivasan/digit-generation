@@ -5,8 +5,10 @@ import torch, matplotlib.pyplot as plt
 import numpy as np
 import einops
 import imageio
+import os
 from torch import tensor
 from models import MyUNet, MyBlock, MyDDPM
+from argparse import ArgumentParser
 
 # settings
 n_steps = 1000
@@ -77,7 +79,10 @@ def generate_PCA_images(
     n_samples=100,
     device=None,
     frames_per_gif=100,
-    gif_name="sampling.gif",
+    gif_name="latent_pca.gif",
+    out_dir="visualizations",
+    store_gif=False,
+    cutoff=3,
     c=1,
     h=28,
     w=28,
@@ -114,7 +119,7 @@ def generate_PCA_images(
             # reshape reconstructed projections into 28x28 images
 
             # Adding frames to the GIF
-            if idx in frame_idxs or t == 0:
+            if store_gif and idx in frame_idxs or t == 0:
                 # Putting digits in range [0, 255]
                 normalized = recon.clone()
                 for i in range(len(normalized)):
@@ -131,6 +136,11 @@ def generate_PCA_images(
 
                 # Rendering frame
                 frames.append(frame)
+
+            if t < cutoff:
+                # TODO write visualizations to outdir
+                print(f"Writing to {out_dir}")
+                pass
             
             if t > 0:
                 z = torch.randn(N, c, h, w).to(device)
@@ -147,20 +157,33 @@ def generate_PCA_images(
                 # Adding some more noise like in Langevin Dynamics fashion
                 x = x + sigma_t * z
     # Storing the gif
-    with imageio.get_writer(gif_name, mode="I") as writer:
-        for idx, frame in enumerate(frames):
-            rgb_frame = np.repeat(frame, 3, axis=2)
-            writer.append_data(rgb_frame)
+    if store_gif:
+        with imageio.get_writer(gif_name, mode="I") as writer:
+            for idx, frame in enumerate(frames):
+                rgb_frame = np.repeat(frame, 3, axis=2)
+                writer.append_data(rgb_frame)
 
-            # Showing the last frame for a longer time
-            if idx == len(frames) - 1:
-                last_rgb_frame = np.repeat(frames[-1], 3, axis=2)
-                for _ in range(frames_per_gif // 3):
-                    writer.append_data(last_rgb_frame)
+                # Showing the last frame for a longer time
+                if idx == len(frames) - 1:
+                    last_rgb_frame = np.repeat(frames[-1], 3, axis=2)
+                    for _ in range(frames_per_gif // 3):
+                        writer.append_data(last_rgb_frame)
     return x
 
-res = generate_PCA_images(ddpm=model, 
-                          gif_name='latent_pca.gif',
-                          k=5
-                          )
-plot_images(res.squeeze(1))
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument( "--outdir", type=str, help="Directory to store visualizations from analysis")
+    parser.add_argument("--gif", action="store_true", help="Store gif if true",)
+    parser.add_argument("--k", type=int, default=3, help="Number of principal components")
+    parser.add_argument("--n", type=int, default=100, help="Number of image samples to generate")
+    parser.add_argument("--c", type=float, default=3, help="Cutoff for latent states PCA is applied to")
+    args = vars(parser.parse_args())
+    print(f"Starting PCA analysis with k: {args['k']}\tn: {args['n']}\tc: {args['c']}")
+    res = generate_PCA_images(ddpm=model, 
+                            gif_name='latent_pca.gif',
+                            n_samples=args["n"],
+                            cutoff=args["c"],
+                            store_gif=args["gif"],
+                            k=args["k"]
+                            )
+    plot_images(res.squeeze(1))
