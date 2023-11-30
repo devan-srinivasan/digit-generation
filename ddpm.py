@@ -279,6 +279,7 @@ def main():
     # show_images(generated, "Images generated before training")
 
     # Training
+    args["no_train"] = True # uncomment to train
     if not args["no_train"]:
         n_epochs, lr = args["epochs"], args["lr"]
         training_loop(
