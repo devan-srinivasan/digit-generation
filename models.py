@@ -191,7 +191,7 @@ class MyUNet(nn.Module):
         out = torch.cat((out1, self.up3(out5)), dim=1)  # (N, 20, 28, 28)
         out = self.b_out(out + self.te_out(t).reshape(n, -1, 1, 1))  # (N, 1, 28, 28)
 
-        out = self.conv_out(out)
+        out = self.conv_out(out).reshape(n, 784)    # TODO don't hardcode 784
 
         return out
 

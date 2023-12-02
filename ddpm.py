@@ -107,7 +107,7 @@ def generate_new_images(
         for idx, t in enumerate(list(range(ddpm.n_steps))[::-1]):
             # Estimating noise to be removed
             time_tensor = (torch.ones(n_samples, 1) * t).to(device).long()
-            eta_theta = ddpm.backward(x, time_tensor)
+            eta_theta = ddpm.backward(x, time_tensor).reshape(-1, 1, 28, 28)    # TODO remove hardcoded 28, 28
 
             alpha_t = ddpm.alphas[t]
             alpha_t_bar = ddpm.alpha_bars[t]
@@ -194,7 +194,7 @@ def training_loop(
             noisy_imgs = ddpm(x0, t, eta)
 
             # Getting model estimation of noise based on the images and the time-step
-            eta_theta = ddpm.backward(noisy_imgs, t.reshape(n, -1))
+            eta_theta = ddpm.backward(noisy_imgs, t.reshape(n, -1)).reshape(-1, 1, 28, 28)  # TODO hardcoding
 
             # Optimizing the MSE between the noise plugged and the predicted noise
             loss = mse(eta_theta, eta)
@@ -300,7 +300,7 @@ def main():
     # Showing generated images
     generated = generate_new_images(
         best_model,
-        n_samples=100,
+        n_samples=1,
         device=device,
         gif_name="fashion.gif" if args["fashion"] else "mnist.gif",
     )
