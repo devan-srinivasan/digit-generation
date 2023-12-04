@@ -145,17 +145,15 @@ def generate_PCA_images(
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--gif", action="store_true", help="Store gif if true",)
     parser.add_argument("--k", type=int, default=3, help="Number of principal components")
     parser.add_argument("--n", type=int, default=15, help="Number of image samples to generate")
     parser.add_argument("--timesteps", type=str, default="999,500,100,1", help="timesteps in DESCENDING ORDER, comma separated")
     args = vars(parser.parse_args())
     args['timesteps'] = [int(x) for x in args['timesteps'].split(',')]
+    print(f"Running PCA analysis with \n\tn:{args['n']}\n\tk:{args['k']}\n\tk:{args['timesteps']}")
     denoised_img, res = generate_PCA_images(ddpm=model, 
-                            gif_name='latent_pca.gif',
                             n_samples=args["n"],
                             timesteps=args["timesteps"],
-                            store_gif=args["gif"],
                             k=args["k"]
                             )
     for pca_res in res:
