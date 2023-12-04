@@ -228,14 +228,15 @@ def main():
     parser.add_argument(
         "--no_train", action="store_true", help="Whether to train a new model or not"
     )
+    parser.add_argument("--n", type=int, default=100, help="Number of samples to generate (if no-train)")
     parser.add_argument(
         "--fashion",
         action="store_true",
         help="Uses MNIST if true, Fashion MNIST otherwise",
     )
-    parser.add_argument("--bs", type=int, default=128, help="Batch size")
-    parser.add_argument("--epochs", type=int, default=20, help="Number of epochs")
-    parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
+    parser.add_argument("--bs", type=int, default=128, help="Batch size (if train)")
+    parser.add_argument("--epochs", type=int, default=20, help="Number of epochs (if train)")
+    parser.add_argument("--lr", type=float, default=0.001, help="Learning rate (if train)")
     args = vars(parser.parse_args())
     print(args)
 
@@ -300,7 +301,7 @@ def main():
     # Showing generated images
     generated = generate_new_images(
         best_model,
-        n_samples=1,
+        n_samples=args['n'],
         device=device,
         gif_name="fashion.gif" if args["fashion"] else "mnist.gif",
     )
