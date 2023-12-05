@@ -226,7 +226,7 @@ def main():
     # Program arguments
     parser = ArgumentParser()
     parser.add_argument(
-        "--no_train", action="store_true", help="Whether to train a new model or not"
+        "--no_train", default=False, action="store_true", help="Whether to train a new model or not"
     )
     parser.add_argument("--n", type=int, default=100, help="Number of samples to generate (if no-train)")
     parser.add_argument(
@@ -280,7 +280,6 @@ def main():
     # show_images(generated, "Images generated before training")
 
     # Training
-    args["no_train"] = True # uncomment to train
     if not args["no_train"]:
         n_epochs, lr = args["epochs"], args["lr"]
         training_loop(
