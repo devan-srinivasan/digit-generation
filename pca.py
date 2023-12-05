@@ -158,3 +158,4 @@ if __name__ == "__main__":
                             )
     for pca_res in res:
         plot_images(pca_res.squeeze(1))
+    plot_images(denoised_img)
