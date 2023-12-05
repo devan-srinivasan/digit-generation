@@ -54,16 +54,19 @@ def run_method_whole(method, noise, time):
     contrast_scale = 1
     return summed_attributions * contrast_scale
 
-def overlay(noise_img, layers):
+def overlay(noise_img, layers, labels = [], no_overlay=True):
     """
     Overlays all images in layer (tensors) on image tensor
     """
     import matplotlib.pyplot as plt
     n_cols = len(layers)
-    fig, axes = plt.subplots(n_cols, figsize=(10, 8))
+    fig, axes = plt.subplots(1, n_cols, figsize=(10, 8))
     for c in range(n_cols):
-        axes[c].imshow(noise_img, 'gray', interpolation='none')
+        axes[c].set_xticks([])
+        axes[c].set_yticks([])
+        if not no_overlay: axes[c].imshow(noise_img, 'gray', interpolation='none')
         axes[c].imshow(layers[c], 'Oranges', interpolation='none', alpha=0.9)
+        if len(labels) == len(layers): axes[c].set_title(f't={labels[c]}') 
     plt.show()
 
 def constant_noise_exp(method, timesteps):
@@ -77,7 +80,7 @@ def constant_noise_exp(method, timesteps):
     results = [
         run_method_whole(method, noise, t)[0][0].detach().numpy() for t in timesteps
     ]
-    overlay(noise[0][0].detach().numpy(), results)
+    overlay(noise[0][0].detach().numpy(), results, [str(e) for e in timesteps])
 
 def live_noise_exp(method, timesteps):
     """
@@ -138,20 +141,20 @@ def live_noise_exp(method, timesteps):
 
             # Adding some more noise like in Langevin Dynamics fashion
             x = x + sigma_t * z
-
+    labels = [str(e) for e in timesteps]
     if method != 'all':
-        overlay(x[0][0].detach().numpy(), results)
+        overlay(x[0][0].detach().numpy(), results, labels)
     else:
-        overlay(x[0][0].detach().numpy(), results1)
-        overlay(x[0][0].detach().numpy(), results2)
-        overlay(x[0][0].detach().numpy(), results3)
+        overlay(x[0][0].detach().numpy(), results1, labels)
+        overlay(x[0][0].detach().numpy(), results2, labels)
+        overlay(x[0][0].detach().numpy(), results3, labels)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument( "--method", type=str, default="saliency", help="One of 'grad-cam', 'saliency', 'integrated-gradients', 'all'. Note 'all' must be run with type 'live'")
+    parser.add_argument( "--method", type=str, default="grad-cam", help="One of 'grad-cam', 'saliency', 'integrated-gradients', 'all'. Note 'all' must be run with type 'live'")
     parser.add_argument("--type", type=str, default="constant", help="One of 'constant', 'live'")
-    parser.add_argument("--timesteps", type=str, default="999,500,100,1", help="timesteps in DESCENDING ORDER, comma separated")
+    parser.add_argument("--timesteps", type=str, default="900, 500, 100, 20, 10, 5, 3, 1", help="timesteps in DESCENDING ORDER, comma separated")
     args = vars(parser.parse_args())
     args['timesteps'] = [int(x) for x in args['timesteps'].split(',')]
     if args['type'] == 'constant':

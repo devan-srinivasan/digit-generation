@@ -60,7 +60,7 @@ def plot_images(
 
     # Create a figure and axis objects
     if n_images <= 10:
-        fig, axes = plt.subplots(n_images, figsize=(10, 8))
+        fig, axes = plt.subplots(1, n_images, figsize=(10, 8))
 
         # Loop through each tensor and plot it on the grid
         for i, tensor in enumerate(image_tensors):
