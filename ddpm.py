@@ -1,4 +1,5 @@
 """
+This trains the model on MNIST with options to also generate images as well.
 CODE FROM: https://github.com/BrianPulfer/PapersReimplementations/blob/main/src/cv/ddpm/ddpm.py
 """
 
