@@ -48,7 +48,8 @@ def PCA(
     projected_data = torch.matmul(centered_data, projection_matrix)
     reconstructed_data = torch.matmul(projected_data, projection_matrix.t()) + data_mean
 
-    return projected_data, reconstructed_data
+    return projected_data, reconstructed_data, eigenvectors
+
 
 def plot_images(
     image_tensors: tensor
@@ -124,7 +125,8 @@ def generate_PCA_images(
             )
             
             if next_idx < len(timesteps) and t == timesteps[next_idx]:
-                proj, recon = PCA(x.squeeze(1).reshape(N, -1), k)
+                proj, recon, e_v = PCA(x.squeeze(1).reshape(N, -1), k)
+                plot_images(e_v.reshape(-1,28,28)[0:10].real)
                 recon = recon.unsqueeze(1).reshape(N, 1, h, w)
                 results.append(recon)
                 next_idx += 1
@@ -152,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument("--timesteps", type=str, default="999,500,100,1", help="timesteps in DESCENDING ORDER, comma separated")
     args = vars(parser.parse_args())
     args['timesteps'] = [int(x) for x in args['timesteps'].split(',')]
-    print(f"Running PCA analysis with \n\tn:{args['n']}\n\tk:{args['k']}\n\tk:{args['timesteps']}")
+    print(f"Running PCA analysis with \n\tn:{args['n']}\n\tk:{args['k']}\n\ttimesteps:{args['timesteps']}")
     denoised_img, res = generate_PCA_images(ddpm=model, 
                             n_samples=args["n"],
                             timesteps=args["timesteps"],
