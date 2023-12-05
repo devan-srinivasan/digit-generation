@@ -50,7 +50,8 @@ def run_method_whole(method, noise, time):
     """
     summed_attributions = torch.zeros(1, 1, 28, 28)
     for k in range(784):
-        summed_attributions += run_method(model=model.network, layer=model.network.conv_out, target=k, t=time, input_noise=noise, method=method)
+        attr = run_method(model=model.network, layer=model.network.up1[2], target=k, t=time, input_noise=noise, method=method)
+        summed_attributions += attr
     contrast_scale = 1
     return summed_attributions * contrast_scale
 
@@ -67,6 +68,41 @@ def overlay(noise_img, layers, labels = [], no_overlay=True):
         if not no_overlay: axes[c].imshow(noise_img, 'gray', interpolation='none')
         axes[c].imshow(layers[c], 'Oranges', interpolation='none', alpha=0.9)
         if len(labels) == len(layers): axes[c].set_title(f't={labels[c]}') 
+    plt.show()
+
+def plot_images(
+    image_tensors: tensor
+):
+    """
+    Given a tensor of image tensors, plot them in a grid
+    """
+    n_images = len(image_tensors)
+
+    # Create a figure and axis objects
+    if 1 < n_images <= 10:
+        fig, axes = plt.subplots(1, n_images, figsize=(10, 8))
+
+        # Loop through each tensor and plot it on the grid
+        for i, tensor in enumerate(image_tensors):
+            ax = axes[i]
+            ax.imshow(tensor.detach().cpu().numpy(), cmap='gray')  # Use 'cmap' for grayscale images
+            ax.axis('off')  # Turn off axis labels
+    elif n_images == 1:
+        plt.imshow(image_tensors[0].detach().cpu().numpy(), cmap='gray')
+    else:
+        # set up grid
+        n_cols = int(n_images ** 0.5)
+        n_rows = n_images // n_cols + int(n_images % n_cols > 0)
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(10, 8))
+
+        # Loop through each tensor and plot it on the grid
+        for i, tensor in enumerate(image_tensors):
+            ax = axes[i // n_cols, i % n_cols]
+            ax.imshow(tensor.detach().cpu().numpy(), cmap='gray')  # Use 'cmap' for grayscale images
+            ax.axis('off')  # Turn off axis labels
+
+    # Adjust layout and display the grid of images
+    plt.tight_layout()
     plt.show()
 
 def constant_noise_exp(method, timesteps):
@@ -148,15 +184,17 @@ def live_noise_exp(method, timesteps):
         overlay(x[0][0].detach().numpy(), results1, labels)
         overlay(x[0][0].detach().numpy(), results2, labels)
         overlay(x[0][0].detach().numpy(), results3, labels)
+    plot_images(x.squeeze(1))
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument( "--method", type=str, default="grad-cam", help="One of 'grad-cam', 'saliency', 'integrated-gradients', 'all'. Note 'all' must be run with type 'live'")
-    parser.add_argument("--type", type=str, default="constant", help="One of 'constant', 'live'")
+    parser.add_argument( "--method", type=str, default="saliency", help="One of 'grad-cam', 'saliency', 'integrated-gradients', 'all'. Note 'all' must be run with type 'live'")
+    parser.add_argument("--type", type=str, default="live", help="One of 'constant', 'live'")
     parser.add_argument("--timesteps", type=str, default="900, 500, 100, 20, 10, 5, 3, 1", help="timesteps in DESCENDING ORDER, comma separated")
     args = vars(parser.parse_args())
     args['timesteps'] = [int(x) for x in args['timesteps'].split(',')]
+    print(f'Running Captum Experiments \n\t method:{args["method"]} \n\t type:{args["type"]} \n\t timesteps:{args["timesteps"]}')
     if args['type'] == 'constant':
         constant_noise_exp(args['method'], args['timesteps'])
     else:
