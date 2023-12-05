@@ -27,13 +27,10 @@ Now you can run the model and experiments.  Note that all experiments, when ran 
 - `--type` is the type of noise input to the analysis, constant for all timesteps, or live during denoising (usually more interesting)
 -  `--timesteps` is a comma separated list of integers that represent time steps we execute PCA at.
 
-**Grad-CAM:** This will generate overlayed maps that signal the relevance of the last convolution layer to the final output, via it's gradients. One can interpret what regions of the segmented image (from U-Net) are then used for the prediction decision.
-**Saliency:** This will generate overlayed maps that signal the attribution of the input features themselves to the final output.  One can interpret what pixels of the original noisy image are then used for the prediction decision in U-Net.
-**Integrated Gradients:** [ TODO ]
-### Kernel Visualizations
-[ yet to be implemented ]
-### Conditioned Sampling Saliency
-[ yet to be implemented ]
+**Grad-CAM:** This will generate overlayed maps that signal the relevance of the last convolution layer to the final output, via it's gradients. One can interpret what regions of the segmented image (from U-Net) are then used for the prediction decision. 
 
+**Saliency:** This will generate overlayed maps that signal the attribution of the input features themselves to the final output, based on gradients.  One can interpret what pixels of the original noisy image are then used for the prediction decision in U-Net.
 
-<h2>Sources</h2>
+**Integrated Gradients:** This method generates overlayed maps that signal the attribution of input features to the final output, based on integrating the gradients of respective input features relative to a baseline. One can interpret what pixels of the original noisy image are then used for the prediction decision in U-Net.
+
+Note, with the `run_method_whole` method, you can change the `summed_attributions` shape and the `layer=` attribute to run the experiments with different layers in the U-Net. 
