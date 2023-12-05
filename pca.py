@@ -59,7 +59,7 @@ def plot_images(
     n_images = len(image_tensors)
 
     # Create a figure and axis objects
-    if n_images <= 10:
+    if 1 < n_images <= 10:
         fig, axes = plt.subplots(1, n_images, figsize=(10, 8))
 
         # Loop through each tensor and plot it on the grid
@@ -67,6 +67,8 @@ def plot_images(
             ax = axes[i]
             ax.imshow(tensor.detach().cpu().numpy(), cmap='gray')  # Use 'cmap' for grayscale images
             ax.axis('off')  # Turn off axis labels
+    elif n_images == 1:
+        plt.imshow(image_tensors[0].detach().cpu().numpy(), cmap='gray')
     else:
         # set up grid
         n_cols = int(n_images ** 0.5)
