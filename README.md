@@ -1,8 +1,8 @@
 # Generating Handwritten Digits
 Project for CSC311 Fall 2023 at the University of Toronto 
 
-**READ THE REPORT:**
-[Report](CSC311_Project.pdf)
+**READ OUR PAPER**
+[Project Paper](CSC311_Project.pdf)
 
 ## Overview
 This project aims to assess the interpretability of diffusion models for image generation, with the chosen scope to be generating handwritten digits. We do so by running experiments on both the U-Net noise predictor and denoising process, allowing us to gain insight into what guides the generative process apart from the known mathematics and programmatic strategy. The project, including its results, can be found here [ add link if possible ]
